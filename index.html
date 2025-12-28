@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<script>
+    const usuariosApi=fetch("https://script.google.com/macros/s/AKfycbwcst-kvu5TW0RvVItuCEsw3FEOx53_3aWadl-rEac3AAdCyxV1l5FSXzjELBjDhnBo/exec?accion=usuarios");
+
+        usuariosApi.then(response => response.json()).then(data => {
+            usuariosValidos=data.usuarios;console.log("Usuarios cargados:", usuariosValidos);
+
+        }).catch(error => {
+            console.error("Error cargando usuarios:", error);
+        });
+
+
+
+
+</script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Pernocta - Choferes</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 5px solid #667eea;
+        }
+        select, input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        select:focus, input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-secondary {
+            background: #4CAF50;
+            color: white;
+        }
+        .btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+            text-align: center;
+        }
+        .status-pendiente {
+            background: #FFF3CD;
+            color: #856404;
+            border: 2px solid #FFC107;
+        }
+        .status-completado {
+            background: #D4EDDA;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+        .hidden {
+            display: none;
+        }
+        .info-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .info-value {
+            color: #333;
+        }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+        .connection-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .online {
+            background-color: #4CAF50;
+        }
+        .offline {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚚 Registro de Pernocta</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 20px;">
+            Sistema simplificado para choferes
+        </p>
+        
+        <!-- Indicador de conexión -->
+        <div style="text-align: center; margin-bottom: 15px;">
+            <span id="connectionIndicator" class="connection-status online"></span>
+            <span id="connectionText" style="font-size: 14px; color: #4CAF50;">Conectado</span>
+        </div>
+        <!--login-->
+               <!-- AL PRINCIPIO DE TU HTML, ANTES DEL FORMULARIO -->
+        <div id="loginScreen" style="text-align: center; padding: 20px;">
+            <h2>🔐 Login</h2>
+            <input type="text" id="loginUser" placeholder="Usuario"><br><br>
+            <input type="password" id="loginPass" placeholder="Contraseña"><br><br>
+           <button onclick="verificarLogin()">Entrar</button>
+            <p id="loginError" style="color: red; display: none;">Credenciales incorrectas</p>
+        </div>
+
+        <!-- TODO TU CONTENIDO ACTUAL, pero oculto al inicio -->
+        <div id="appContent" style="display: none;">
+            <!-- Tu HTML completo actual aquí -->
+             <!-- Estado 1: Sin pernocta activa -->
+        <div id="estadoInicial">
+            <div class="card">
+                <h3 style="margin-top: 0;">📍 Registrar Fin de Jornada</h3>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                    Usa esta opción cuando terminas tu jornada en otra ciudad
+                </p>
+                
+                <select id="chofer">
+                    <option value="">Selecciona tu nombre</option>
+                    <!-- Los choferes se cargan automáticamente -->
+                </select>
+                
+                <input type="text" id="ciudad" 
+                       placeholder="Ciudad donde pernoctas (opcional)">
+                
+                <button id="btnRegistrarPernocta" class="btn btn-primary">
+                    📅 Guardar Pernocta (Local)
+                </button>
+                
+                <p style="font-size: 12px; color: #888; text-align: center; margin-top: 15px;">
+                    <strong>Nota:</strong> Solo se guarda en tu dispositivo.<br>
+                    Mañana completa el registro con "Registrar Retorno".
+                </p>
+            </div>
+        </div>
+        
+        <!-- Estado 2: Pernocta activa -->
+        <div id="estadoPernoctaActiva" class="hidden">
+            <div class="card">
+                <div class="status status-pendiente">
+                    ⏰ Pernocta Registrada - Esperando Retorno
+                </div>
+                
+                <div class="info-line">
+                    <span class="info-label">Chofer:</span>
+                    <span class="info-value" id="displayChofer"></span>
+                </div>
+                <div class="info-line">
+                    <span class="info-label">Hora fin de jornada:</span>
+                    <span class="info-value" id="displayHoraFin"></span>
+                </div>
+                <div class="info-line">
+                    <span class="info-label">Ciudad de pernocta:</span>
+                    <span class="info-value" id="displayCiudad"></span>
+                </div>
+                <div class="info-line">
+                    <span class="info-label">Registrado el:</span>
+                    <span class="info-value" id="displayFechaRegistro"></span>
+                </div>
+                
+                <button id="btnRegistrarRetorno" class="btn btn-secondary">
+                    ✅ Registrar Retorno a Base
+                </button>
+                
+                <div id="loader" class="loader hidden"></div>
+                
+                <button id="btnCancelar" class="btn" 
+                        style="background: #f8f9fa; color: #666; margin-top: 10px;">
+                    ❌ Cancelar Pernocta
+                </button>
+                
+                <p style="font-size: 12px; color: #888; text-align: center; margin-top: 15px;">
+                    <strong>Importante:</strong> Esta acción enviará el registro completo<br>
+                    a la planilla de Google Sheets.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Mensajes para el usuario -->
+        <div id="mensajeUsuario" class="status hidden"></div>
+        
+        <!-- Panel de registros pendientes -->
+        <div id="panelPendientes" class="card hidden" style="margin-top: 20px;">
+            <h4 style="margin-top: 0;">📤 Registros Pendientes de Envío</h4>
+            <div id="listaPendientes"></div>
+        </div>
+        
+        <div class="footer">
+            © Sistema de Pernoctas v1.0<br>
+            <span id="appStatus" style="font-size: 11px; color: #999;"></span>
+        </div>
+    </div>
+
+        </div>
+
+        <script>
+// Usuarios SIMPLES (podemos cambiarlos después por Google Sheets)
+        
+      //  const usuariosApi=fetch("https://script.google.com/macros/s/AKfycbwcst-kvu5TW0RvVItuCEsw3FEOx53_3aWadl-rEac3AAdCyxV1l5FSXzjELBjDhnBo/exec?accion=usuarios");
+//
+      //  usuariosApi.then(response => response.json()).then(data => {
+      //      usuariosValidos=data.usuarios;console.log("Usuarios cargados:", usuariosValidos);
+//
+      //  }).catch(error => {
+      //      console.error("Error cargando usuarios:", error);
+      //  });
+        
+        
+        
+        
+       // const usuariosValidos = [
+        //    { user: "admin", pass: "admin123", nombre: "Administrador" },
+       //     { user: "jvaras", pass: "123456", nombre: "Varas Jose Maria" }
+       // ];
+
+        function verificarLogin() {
+         const user = document.getElementById('loginUser').value;
+         const pass = document.getElementById('loginPass').value;
+
+         const usuario = usuariosValidos.find(u => u.usuario === user && u.password === pass);
+        
+         if (usuario) {
+             // Guardar en localStorage
+                localStorage.setItem('usuarioLogueado', JSON.stringify(usuario));
+                
+             // Mostrar la app
+             document.getElementById('loginScreen').style.display = 'none';
+             document.getElementById('appContent').style.display = 'block';
+
+                // Opcional: mostrar nombre del usuario
+                alert(`Bienvenido ${usuario.nombre}`);
+                location.reload();
+            
+         } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Al cargar la página, verificar si ya está logueado
+        window.onload = function() {
+            const guardado = localStorage.getItem('usuarioLogueado');
+            console.log("Usuario guardado:", guardado);
+        // VERIFICAR SI EL PASSWORD NO CAMBIO PARA EVITAR ACCESOS NO AUTORIZADOS
+        
+            
+
+
+
+            if (guardado ) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+            }
+        }
+        </script>
+        
+        
+    <script>
+        // ================= CONFIGURACIÓN FIJA =================
+       // const API_URL = "https://script.google.com/macros/s/AKfycbw-YYQ1lZPoKC-J3RlA-kzU6oTPeynnRRRypdWPFxgjCu80Z2YU8voLQmyj9hhjIHs_dQ/exec";
+        const API_URL ="https://script.google.com/macros/s/AKfycbwo4qO2Kc6lhnK60W68yiFcaU07NWsHsR6kWwXebppHtUrnHrD7JeGLls111Qkdk3cSUA/exec"
+        // ================= ESTADO DE LA APLICACIÓN =================
+        let pernoctaActiva = null;
+        let registrosPendientes = [];
+        let hayConexion = true;
+        
+        // ================= INICIALIZACIÓN =================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 Aplicación iniciada");
+            console.log("🔗 URL API:", API_URL);
+            
+            // Cargar datos iniciales
+            cargarChoferes();
+            cargarEstado();
+            cargarPendientes();
+            actualizarVista();
+            verificarConexion();
+            
+            // Configurar event listeners
+            document.getElementById('btnRegistrarPernocta').addEventListener('click', registrarPernocta);
+            document.getElementById('btnRegistrarRetorno').addEventListener('click', registrarRetorno);
+            document.getElementById('btnCancelar').addEventListener('click', cancelarPernocta);
+            
+            // Monitorear conexión periódicamente
+            setInterval(verificarConexion, 30000); // Cada 30 segundos
+            
+            // Reintentar pendientes automáticamente
+            setInterval(reintentarPendientes, 60000); // Cada 1 minuto
+            
+            // Mostrar estado de la app
+            mostrarEstadoApp();
+        });
+        
+        // ================= FUNCIONES PRINCIPALES =================
+        
+        const verUsuarioLgueado = JSON.parse(localStorage.getItem('usuarioLogueado'));
+        
+        
+        
+        function cargarChoferes() {
+
+            
+                
+            const choferes = [
+                verUsuarioLgueado['nombre'] || "Chofer Desconocido"
+                
+            ];
+            
+            //console.log("Usuario logueado:", verUsuarioLgueado['nombre']);
+            
+            const select = document.getElementById('chofer');
+            select.innerHTML = '<option value="">Selecciona tu nombre</option>';
+            
+            choferes.forEach(chofer => {
+                const option = document.createElement('option');
+                option.value = chofer;
+                option.textContent = chofer;
+                select.appendChild(option);
+            });
+            
+            console.log(`👥 ${choferes.length} choferes cargados`);
+        }
+        
+        function cargarEstado() {
+            try {
+                const guardado = localStorage.getItem('pernocta_pendiente');
+                if (guardado) {
+                    pernoctaActiva = JSON.parse(guardado);
+                    console.log("📱 Pernocta cargada:", pernoctaActiva);
+                }
+            } catch (e) {
+                console.error("❌ Error cargando estado:", e);
+                localStorage.removeItem('pernocta_pendiente');
+            }
+        }
+        
+        function cargarPendientes() {
+            try {
+                const pendientes = localStorage.getItem('registros_pendientes');
+                registrosPendientes = pendientes ? JSON.parse(pendientes) : [];
+                console.log(`📦 ${registrosPendientes.length} registros pendientes cargados`);
+            } catch (e) {
+                console.error("❌ Error cargando pendientes:", e);
+                registrosPendientes = [];
+            }
+        }
+        
+        function guardarEstado() {
+            try {
+                if (pernoctaActiva) {
+                    localStorage.setItem('pernocta_pendiente', JSON.stringify(pernoctaActiva));
+                } else {
+                    localStorage.removeItem('pernocta_pendiente');
+                }
+            } catch (e) {
+                console.error("❌ Error guardando estado:", e);
+            }
+        }
+        
+        function actualizarVista() {
+            // Estado de pernocta activa
+            if (pernoctaActiva) {
+                document.getElementById('estadoInicial').classList.add('hidden');
+                document.getElementById('estadoPernoctaActiva').classList.remove('hidden');
+                
+                // Actualizar información mostrada
+                document.getElementById('displayChofer').textContent = pernoctaActiva.chofer;
+                document.getElementById('displayHoraFin').textContent = pernoctaActiva.horaFin;
+                document.getElementById('displayCiudad').textContent = pernoctaActiva.ciudad || "No especificada";
+                document.getElementById('displayFechaRegistro').textContent = 
+                    new Date(pernoctaActiva.timestamp).toLocaleString("es-AR");
+            } else {
+                document.getElementById('estadoInicial').classList.remove('hidden');
+                document.getElementById('estadoPernoctaActiva').classList.add('hidden');
+            }
+            
+            // Panel de pendientes
+            actualizarPanelPendientes();
+        }
+        
+        function actualizarPanelPendientes() {
+            const panel = document.getElementById('panelPendientes');
+            const lista = document.getElementById('listaPendientes');
+            
+            if (registrosPendientes.length > 0) {
+                panel.classList.remove('hidden');
+                lista.innerHTML = '';
+                
+                registrosPendientes.forEach((registro, index) => {
+                    const fecha = new Date(registro.timestamp).toLocaleString("es-AR");
+                    const div = document.createElement('div');
+                    div.style.cssText = `
+                        background: ${index % 2 === 0 ? '#fff' : '#f8f9fa'};
+                        padding: 10px;
+                        margin: 5px 0;
+                        border-radius: 6px;
+                        border-left: 4px solid #ff9800;
+                        font-size: 13px;
+                    `;
+                    div.innerHTML = `
+                        <strong>${registro.datos.chofer}</strong><br>
+                        <small>Fin: ${registro.datos.horaFin} | Inicio: ${registro.datos.horaInicio}</small><br>
+                        <small>${fecha} | Intentos: ${registro.intentos || 0}</small>
+                    `;
+                    lista.appendChild(div);
+                });
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+        
+        // ================= MANEJADORES DE EVENTOS =================
+        function registrarPernocta() {
+            const chofer = document.getElementById('chofer').value;
+            const ciudad = document.getElementById('ciudad').value;
+            
+            if (!chofer) {
+                mostrarMensaje("⚠️ Por favor, selecciona tu nombre", "error");
+                return;
+            }
+            
+            const horaFin = obtenerHoraActual();
+            const fechaCompleta = new Date().toLocaleString("es-AR");
+            
+            pernoctaActiva = {
+                chofer: chofer,
+                horaFin: horaFin,
+                ciudad: ciudad,
+                timestamp: new Date().toISOString(),
+                fechaRegistro: fechaCompleta
+            };
+            
+            guardarEstado();
+            actualizarVista();
+            
+            mostrarMensaje(`✅ Pernocta registrada localmente a las ${horaFin}`, "success");
+            
+            // Limpiar formulario
+            document.getElementById('chofer').value = "";
+            document.getElementById('ciudad').value = "";
+            
+            // Mostrar estado
+            mostrarEstadoApp();
+        }
+        
+        async function registrarRetorno() {
+            if (!pernoctaActiva) {
+                mostrarMensaje("❌ No hay pernocta activa", "error");
+                return;
+            }
+            
+            // Mostrar loader
+            const loader = document.getElementById('loader');
+            const btn = document.getElementById('btnRegistrarRetorno');
+            loader.classList.remove('hidden');
+            btn.disabled = true;
+            
+            try {
+                // Preparar datos completos
+                const horaInicio = obtenerHoraActual();
+                const datos = {
+                    chofer: pernoctaActiva.chofer,
+                    horaFin: pernoctaActiva.horaFin,
+                    ciudad: pernoctaActiva.ciudad,
+                    horaInicio: horaInicio,
+                    estado: "COMPLETADO",
+                    fechaRegistro: pernoctaActiva.fechaRegistro,
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log("📤 Enviando registro:", datos);
+                
+                // Intentar enviar
+                const enviado = await enviarDatos(datos);
+                
+                if (enviado) {
+                    // Éxito: limpiar pernocta activa
+                    pernoctaActiva = null;
+                    guardarEstado();
+                    actualizarVista();
+                    
+                    mostrarMensaje("✅ Registro completo enviado a la planilla", "success");
+                    console.log("🎉 Registro enviado exitosamente");
+                    localStorage.removeItem('usuarioLogueado');
+                    location.reload();
+                    
+                } else {
+                    // Error: guardar como pendiente
+                    guardarComoPendiente(datos);
+                    pernoctaActiva = null;
+                    guardarEstado();
+                    actualizarVista();
+                    
+                    mostrarMensaje("📱 Guardado localmente. Se enviará automáticamente cuando haya conexión.", "success");
+                }
+                
+            } catch (error) {
+                console.error("💥 Error en registrarRetorno:", error);
+                mostrarMensaje("❌ Error inesperado. Contacta al administrador.", "error");
+                
+            } finally {
+                loader.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+        
+        function cancelarPernocta() {
+            if (confirm("¿Estás seguro de cancelar esta pernocta registrada?\n\nLos datos locales se perderán.")) {
+                pernoctaActiva = null;
+                guardarEstado();
+                actualizarVista();
+                mostrarMensaje("❌ Pernocta cancelada", "info");
+            }
+        }
+        
+        // ================= FUNCIONES DE COMUNICACIÓN =================
+        async function enviarDatos(datos) {
+            // Si no hay conexión, guardar como pendiente
+            if (!hayConexion) {
+                console.log("🌐 Sin conexión, guardando como pendiente");
+                guardarComoPendiente(datos);
+                return false;
+            }
+            
+            try {
+                console.log("🌐 Intentando enviar datos a la API...");
+                
+                // Usar fetch con timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+                
+                const respuesta = await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Usar no-cors para evitar problemas CORS
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                console.log("✅ Datos enviados (modo no-cors)");
+                
+                // Nota: en modo no-cors no podemos leer la respuesta,
+                // pero asumimos éxito si no hay error de red
+                return true;
+                
+            } catch (error) {
+                console.error("❌ Error enviando datos:", error);
+                
+                // Si es error de timeout o red, guardar como pendiente
+                if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
+                    guardarComoPendiente(datos);
+                    hayConexion = false;
+                    actualizarEstadoConexion();
+                }
+                
+                return false;
+            }
+        }
+        
+        function guardarComoPendiente(datos) {
+            try {
+                registrosPendientes.push({
+                    datos: datos,
+                    timestamp: new Date().toISOString(),
+                    intentos: 0
+                });
+                
+                localStorage.setItem('registros_pendientes', JSON.stringify(registrosPendientes));
+                console.log(`💾 Guardado como pendiente. Total: ${registrosPendientes.length}`);
+                
+                actualizarPanelPendientes();
+                mostrarEstadoApp();
+                
+            } catch (e) {
+                console.error("❌ Error guardando pendiente:", e);
+            }
+        }
+        
+        async function reintentarPendientes() {
+            if (registrosPendientes.length === 0 || !hayConexion) return;
+            
+            console.log(`🔄 Reintentando ${registrosPendientes.length} registros pendientes...`);
+            
+            let algunEnvioExitoso = false;
+            
+            for (let i = registrosPendientes.length - 1; i >= 0; i--) {
+                const item = registrosPendientes[i];
+                
+                // Limitar a 3 intentos
+                if (item.intentos >= 3) {
+                    console.log(`⏭️ Eliminando registro con 3 intentos fallidos: ${item.datos.chofer}`);
+                    registrosPendientes.splice(i, 1);
+                    continue;
+                }
+                
+                try {
+                    // Intentar enviar
+                    const controller = new AbortController();
+                    setTimeout(() => controller.abort(), 5000);
+                    
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(item.datos),
+                        signal: controller.signal
+                    });
+                    
+                    // Éxito: eliminar de pendientes
+                    registrosPendientes.splice(i, 1);
+                    algunEnvioExitoso = true;
+                    console.log(`✅ Registro pendiente enviado: ${item.datos.chofer}`);
+                    
+                } catch (error) {
+                    item.intentos++;
+                    console.log(`❌ Intento ${item.intentos} fallado para: ${item.datos.chofer}`);
+                }
+            }
+            
+            // Actualizar localStorage
+            if (algunEnvioExitoso || registrosPendientes.length > 0) {
+                localStorage.setItem('registros_pendientes', JSON.stringify(registrosPendientes));
+                actualizarPanelPendientes();
+                mostrarEstadoApp();
+            }
+        }
+        
+        // ================= FUNCIONES AUXILIARES =================
+        function obtenerHoraActual() {
+            const ahora = new Date();
+            return ahora.toLocaleTimeString('es-AR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+        }
+        
+        async function verificarConexion() {
+            const anterior = hayConexion;
+            
+            try {
+                // Intentar hacer una petición simple
+                await fetch('https://www.google.com', { 
+                    mode: 'no-cors',
+                    cache: 'no-store'
+                });
+                
+                hayConexion = true;
+                
+            } catch (error) {
+                hayConexion = false;
+            }
+            
+            // Solo actualizar la UI si cambió el estado
+            if (anterior !== hayConexion) {
+                actualizarEstadoConexion();
+                
+                // Si volvimos a tener conexión, reintentar pendientes
+                if (hayConexion && registrosPendientes.length > 0) {
+                    setTimeout(reintentarPendientes, 1000);
+                }
+            }
+            
+            return hayConexion;
+        }
+        
+        function actualizarEstadoConexion() {
+            const indicador = document.getElementById('connectionIndicator');
+            const texto = document.getElementById('connectionText');
+            
+            if (hayConexion) {
+                indicador.className = 'connection-status online';
+                texto.textContent = 'Conectado';
+                texto.style.color = '#4CAF50';
+            } else {
+                indicador.className = 'connection-status offline';
+                texto.textContent = 'Sin conexión';
+                texto.style.color = '#f44336';
+                
+                if (pernoctaActiva || registrosPendientes.length > 0) {
+                    mostrarMensaje("📱 Modo offline activado. Los datos se guardarán localmente.", "info");
+                }
+            }
+        }
+        
+        function mostrarMensaje(texto, tipo = 'info') {
+            const div = document.getElementById('mensajeUsuario');
+            div.textContent = texto;
+            div.className = 'status';
+            
+            // Aplicar estilo según tipo
+            if (tipo === 'success') {
+                div.classList.add('status-completado');
+            } else if (tipo === 'error') {
+                div.classList.add('status-error');
+            } else {
+                div.style.background = '#d1ecf1';
+                div.style.color = '#0c5460';
+                div.style.border = '2px solid #17a2b8';
+            }
+            
+            div.classList.remove('hidden');
+            
+            // Ocultar después de 5 segundos
+            setTimeout(() => {
+                div.classList.add('hidden');
+            }, 5000);
+        }
+        
+        function mostrarEstadoApp() {
+            const statusDiv = document.getElementById('appStatus');
+            let mensaje = `App lista`;
+            
+            if (pernoctaActiva) {
+                mensaje += ` | 1 pernocta pendiente`;
+            }
+            
+            if (registrosPendientes.length > 0) {
+                mensaje += ` | ${registrosPendientes.length} envíos pendientes`;
+            }
+            
+            if (!hayConexion) {
+                mensaje += ` | OFFLINE`;
+            }
+            
+            statusDiv.textContent = mensaje;
+        }
+        
+        // Función para limpiar todos los datos (solo para desarrollo)
+        function limpiarTodo() {
+            if (confirm("¿Estás seguro de limpiar TODOS los datos locales?\n\nEsto incluye pernoctas activas y registros pendientes.")) {
+                localStorage.clear();
+                pernoctaActiva = null;
+                registrosPendientes = [];
+                actualizarVista();
+                mostrarMensaje("🧹 Todos los datos locales han sido limpiados", "info");
+                mostrarEstadoApp();
+            }
+        }
+        
+        // Exponer función de limpieza para desarrollo (quitar en producción)
+        window.limpiarTodo = limpiarTodo;
+        
+        // Manejar cuando la app vuelve a primer plano
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Verificar conexión y reintentar pendientes
+                verificarConexion().then(conectado => {
+                    if (conectado && registrosPendientes.length > 0) {
+                        reintentarPendientes();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
