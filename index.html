@@ -213,7 +213,8 @@
             mostrarPernocteActivo(inicioPernocte);
            
           } else {
-           // mostrarResumen();
+            document.getElementById("mainScreen").style.display = "block";
+            mostrarResumen();
           }
         } else {
           // sesión inválida: limpiar y mostrar login
@@ -249,12 +250,14 @@
         localStorage.setItem("usuario", usuario);
         localStorage.setItem("password", password); // MVP
         mostrarBienvenida(usuario);
-
+        mostrarMain();
+        mostrarResumen();
         const inicioPernocte = localStorage.getItem("inicioPernocte");
         if (inicioPernocte) {
           mostrarPernocteActivo(inicioPernocte);
         } else {
-          mostrarMain();
+          
+          
         }
       } else {
         alert("Usuario o contraseña inválidos, o usuario inactivo.");
@@ -266,7 +269,7 @@
         const res = await fetch(endpoint+ "?tipo=usuarios");
         const data = await res.json();
         const chofer = data.find(c => String(c.usuario) === usuario && String(c.password) === password);
-        mostrarMain()
+        //mostrarMain()
         return !!(chofer && String(chofer.activo).toUpperCase() === "SI");
       } catch (err) {
         console.error("Error validando usuario:", err);
