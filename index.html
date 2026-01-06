@@ -160,7 +160,7 @@
     <div class="badge" id="contador">0h 0m 0s</div>
 
     <p>Inicio: <span id="inicioPernocte"></span></p>
-    <button onclick="finalizarPernocte()">Finalizar Pernocte</button>
+    <button id="btn_enviar"onclick="finalizarPernocte()">Finalizar Pernocte</button>
     <p>Tiempo en pernocte: <span id="contador"></span></p>
 
   </div>
@@ -315,10 +315,17 @@
 
     async function finalizarPernocte() {
       const inicioISO = localStorage.getItem("inicioPernocte");
-
+      document.getElementById("btn_enviar").disabled = true;
       //const finISO = new Date().toISOString();
-      const inicio = new Date(inicioISO);
-      const fin = new Date();
+      const inicioL = new Date(inicioISO);
+      const inicio= new Date(inicioL.setHours(inicioL.getHours() - 3));
+      const final = new Date();
+      
+      const fin= new Date( final.setHours(final.getHours() - 3));
+
+
+
+
 
 
 
@@ -347,6 +354,7 @@
         //const data = await res.json();
        // console.log("Respuesta del servidor:", data);
         alert("Pernocte finalizado y enviado.");
+        document.getElementById("btn_enviar").disabled = false;
       } catch (err) {
         console.error("Error enviando pernocte:", err);
         alert("No se pudo enviar. Queda activo hasta nuevo intento.");
