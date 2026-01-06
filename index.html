@@ -162,7 +162,7 @@
     <p>Inicio: <span id="inicioPernocte"></span></p>
     <button onclick="finalizarPernocte()">Finalizar Pernocte</button>
   </div>
-  <p>Tiempo en pernocte: <span id="contador"></span></p>
+  <!--p>Tiempo en pernocte: <span id="contador"></span></p-->
 
     <div id="resumen">
         <h3>Resumen de Pernoctes</h3>
@@ -194,7 +194,7 @@
             mostrarPernocteActivo(inicioPernocte);
            
           } else {
-            mostrarMain();
+            //mostrarMain();
           }
         } else {
           // sesión inválida: limpiar y mostrar login
@@ -231,7 +231,7 @@
         if (inicioPernocte) {
           mostrarPernocteActivo(inicioPernocte);
         } else {
-          mostrarMain();
+          //mostrarMain();
         }
       } else {
         alert("Usuario o contraseña inválidos, o usuario inactivo.");
@@ -243,6 +243,7 @@
         const res = await fetch(endpoint+ "?tipo=usuarios");
         const data = await res.json();
         const chofer = data.find(c => String(c.usuario) === usuario && String(c.password) === password);
+        mostrarMain()
         return !!(chofer && String(chofer.activo).toUpperCase() === "SI");
       } catch (err) {
         console.error("Error validando usuario:", err);
@@ -407,7 +408,7 @@ window.addEventListener("load", () => {
     iniciarContador(inicio); // retoma el contador desde el inicio guardado
   } else {
     // si no hay pernocte activo, mostrar pantalla principal
-    document.getElementById("mainScreen").style.display = "block";
+    document.getElementById("mainScreen").style.display = "none";
     document.getElementById("pernocteActivo").style.display = "none";
   }
 });
