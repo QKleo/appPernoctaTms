@@ -436,13 +436,19 @@ function iniciarContador(inicio) {
 
 window.addEventListener("load", () => {
   const inicioISO = localStorage.getItem("inicioPernocte");
-  if (inicioISO) {
+  const usuarioG = localStorage.getItem("usuario");
+  if (inicioISO && usuarioG) {
     const inicio = new Date(inicioISO);
     document.getElementById("mainScreen").style.display = "none";
     document.getElementById("pernocteActivo").style.display = "block";
     document.getElementById("inicioPernocte").textContent = inicio.toLocaleString();
     document.getElementById("loginForm").style.display = "none";
     iniciarContador(inicio); // retoma el contador desde el inicio guardado
+  }else if (!usuarioG && inicioISO) {
+    document.getElementById("loginForm").style.display = "block";
+    const inicio = new Date(inicioISO);
+    iniciarContador(inicio);
+    //mostrarResumen();
   } else {
     // si no hay pernocte activo, mostrar pantalla principal
     document.getElementById("mainScreen").style.display = "none";
