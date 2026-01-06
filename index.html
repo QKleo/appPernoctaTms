@@ -137,7 +137,7 @@
   <div id="loading" style="display:none;">Validando sesión...</div>
 
   <!-- Login -->
-  <div id="loginForm">
+  <div id="loginForm" style="display:none;">
     <input type="text" id="usuario" placeholder="Usuario" style="font: 2em sans-serif;border-radius: 7px;"><br><br>
     <input type="password" id="password" placeholder="Contraseña" style="font:2em sans-serif ;border-radius: 7px"><br><br>
     <button id="btnIngresar" onclick="login()">Ingresar</button>
@@ -161,9 +161,10 @@
 
     <p>Inicio: <span id="inicioPernocte"></span></p>
     <button onclick="finalizarPernocte()">Finalizar Pernocte</button>
-  </div>
-  <!--p>Tiempo en pernocte: <span id="contador"></span></p-->
+    <p>Tiempo en pernocte: <span id="contador"></span></p>
 
+  </div>
+  
     <div id="resumen">
         <h3>Resumen de Pernoctes</h3>
         <ul id="listaResumen"></ul>
@@ -182,6 +183,7 @@
       const usuarioGuardado = localStorage.getItem("usuario");
       const passwordGuardado = localStorage.getItem("password");
       const inicioPernocte = localStorage.getItem("inicioPernocte");
+     // document.getElementById("loginForm").style.display = "none";
        mostrarResumen();
       if (usuarioGuardado && passwordGuardado) {
         mostrarLoading(true);
@@ -199,8 +201,11 @@
         } else {
           // sesión inválida: limpiar y mostrar login
           logout(false);
+          //document.getElementById("loginForm").style.display = "block"
           alert("Tu usuario ya no está activo o credenciales cambiaron.");
         }
+      }else {
+        document.getElementById("loginForm").style.display = "block";
       }
     };
 
@@ -231,7 +236,7 @@
         if (inicioPernocte) {
           mostrarPernocteActivo(inicioPernocte);
         } else {
-          //mostrarMain();
+          mostrarMain();
         }
       } else {
         alert("Usuario o contraseña inválidos, o usuario inactivo.");
@@ -247,6 +252,7 @@
         return !!(chofer && String(chofer.activo).toUpperCase() === "SI");
       } catch (err) {
         console.error("Error validando usuario:", err);
+        document.getElementById("loginForm").style.display = "none";
         return false;
       }
     }
@@ -271,9 +277,9 @@
       localStorage.removeItem("password");
       // No borrar inicioPernocte para no perder estado si fue intencional
       document.getElementById("bienvenida").style.display = "none";
-      if (showLogin) document.getElementById("loginForm").style.display = "block";
+      if (showLogin) {document.getElementById("loginForm").style.display = "block";
       document.getElementById("mainScreen").style.display = "none";
-      document.getElementById("pernocteActivo").style.display = "none";
+      document.getElementById("pernocteActivo").style.display = "none";}
     }
 
     // Pernocte
@@ -405,6 +411,7 @@ window.addEventListener("load", () => {
     document.getElementById("mainScreen").style.display = "none";
     document.getElementById("pernocteActivo").style.display = "block";
     document.getElementById("inicioPernocte").textContent = inicio.toLocaleString();
+    //document.getElementById("loginForm").style.display = "none";
     iniciarContador(inicio); // retoma el contador desde el inicio guardado
   } else {
     // si no hay pernocte activo, mostrar pantalla principal
