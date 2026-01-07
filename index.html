@@ -16,6 +16,8 @@
   justify-content: center;
   align-items: center;
   display: flex;
+  flex-direction: column;
+  
 }
 
 .container {
@@ -28,9 +30,11 @@
   flex-direction: column; /* apila elementos verticalmente */
   justify-content: center;
   align-items: center;
+  margin-top: 0px;
+  padding-top: 0px;
   background: white;
   box-sizing: border-box;
-  padding: 20px;
+  /*padding: 20px;*/
   border-radius: 10px;
 }
 
@@ -116,7 +120,9 @@
   }
 }
 
-
+.alinear-arriba {
+    vertical-align: top;
+}
 
 
 
@@ -136,10 +142,11 @@
 
 </head>
 <body>
-<div class="container" >
-  <h2>
+  <nav>soy ..............</nav>
+<div class="container" style="justify-content: start;">
+  <h2 >
   <img src="Icono minimalista es.png" width="32" height="32" >
-  Pernocta App</h2>
+  PernoctaApp Registros TMS </h2>
   
 
    <br>
@@ -150,7 +157,7 @@
     
 
   <!-- Login -->
-  <div id="loginForm" style="display:none; margin-bottom: auto;">
+  <div id="loginForm" style="display:none; ">
     <h1 >Login Choferes</h1>
     <input type="text" id="usuario" placeholder="Usuario" style="font: 1em sans-serif;border-radius: 7px;"><br><br>
     <input type="password" id="password" placeholder="Contraseña" style="font:1em sans-serif ;border-radius: 7px"><br><br>
